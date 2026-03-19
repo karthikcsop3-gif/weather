@@ -480,7 +480,6 @@ async function onLocationSuccess(position) {
   document.getElementById("weatherContent").style.display = "block";
 
   // Display coords
-  document.getElementById("coordsDisplay").textContent = `${lat}° N, ${lon}° E`;
   document.getElementById("gpsAccuracy").textContent = `Accuracy: ±${acc}m`;
 
   // Reverse geocode
