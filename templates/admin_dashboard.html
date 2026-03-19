@@ -36,10 +36,8 @@
     position:sticky; top:0; height:100vh;
     backdrop-filter:blur(20px);
   }
-
   .sidebar-brand {
-    padding:24px 20px;
-    border-bottom:1px solid var(--border);
+    padding:24px 20px; border-bottom:1px solid var(--border);
     font-family:'Space Mono',monospace;
   }
   .sidebar-brand .logo {
@@ -66,8 +64,7 @@
     display:flex; align-items:center; gap:10px;
     padding:9px 12px; border-radius:10px;
     color:var(--muted); font-size:14px; font-weight:500;
-    cursor:pointer; transition:all 0.15s; margin-bottom:2px;
-    text-decoration:none;
+    cursor:pointer; transition:all 0.15s; margin-bottom:2px; text-decoration:none;
   }
   .nav-item:hover { background:rgba(255,255,255,0.05); color:var(--text); }
   .nav-item.active { background:rgba(59,130,246,0.15); color:var(--blue); }
@@ -83,21 +80,18 @@
   }
   .admin-name { font-size:13px; font-weight:600; color:var(--text); }
   .admin-sub  { font-size:11px; color:var(--muted); }
-
   .btn-logout-side {
     display:block; width:100%; padding:9px;
     background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);
-    border-radius:9px; text-align:center;
-    color:var(--red); font-size:13px; font-weight:500;
-    text-decoration:none; transition:all 0.2s; font-family:'Outfit',sans-serif;
+    border-radius:9px; text-align:center; color:var(--red);
+    font-size:13px; font-weight:500; text-decoration:none;
+    transition:all 0.2s; font-family:'Outfit',sans-serif;
   }
   .btn-logout-side:hover { background:rgba(239,68,68,0.2); }
 
   main { flex:1; overflow:auto; }
-
   .topbar {
-    padding:20px 32px;
-    border-bottom:1px solid var(--border);
+    padding:20px 32px; border-bottom:1px solid var(--border);
     display:flex; align-items:center; justify-content:space-between;
     background:rgba(6,10,20,0.6); backdrop-filter:blur(20px);
     position:sticky; top:0; z-index:5;
@@ -123,8 +117,8 @@
 
   .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
   .stat-card {
-    background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px;
-    position:relative; overflow:hidden; transition:border-color 0.2s;
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:22px; position:relative; overflow:hidden; transition:border-color 0.2s;
   }
   .stat-card:hover { border-color:rgba(59,130,246,0.25); }
   .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
@@ -146,20 +140,13 @@
   th {
     text-align:left; padding:12px 16px;
     font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
-    color:var(--muted); background:rgba(255,255,255,0.02);
-    border-bottom:1px solid var(--border);
+    color:var(--muted); background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);
   }
-  td {
-    padding:12px 16px; font-size:13px; color:var(--light);
-    border-bottom:1px solid rgba(255,255,255,0.04);
-  }
+  td { padding:12px 16px; font-size:13px; color:var(--light); border-bottom:1px solid rgba(255,255,255,0.04); }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:rgba(255,255,255,0.02); }
 
-  .badge {
-    display:inline-flex; align-items:center; gap:4px;
-    padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;
-  }
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; }
   .badge-blue   { background:rgba(59,130,246,0.15);  color:#93c5fd; }
   .badge-green  { background:rgba(16,185,129,0.15);  color:#6ee7b7; }
   .badge-red    { background:rgba(239,68,68,0.15);   color:#fca5a5; }
@@ -167,6 +154,9 @@
   .badge-purple { background:rgba(139,92,246,0.15);  color:#c4b5fd; }
 
   .mono { font-family:'Space Mono',monospace; font-size:11px; }
+
+  .alert { padding:12px 18px; border-radius:10px; font-size:13px; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+  .alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#fca5a5; }
 
   .modal-overlay {
     position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px);
@@ -191,12 +181,6 @@
   }
   .modal input:focus { border-color:var(--blue); background:rgba(59,130,246,0.08); }
   .modal-actions { display:flex; gap:10px; margin-top:8px; }
-
-  .alert {
-    padding:12px 18px; border-radius:10px; font-size:13px;
-    margin-bottom:20px; display:flex; align-items:center; gap:8px;
-  }
-  .alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#fca5a5; }
 
   ::-webkit-scrollbar { width:6px; height:6px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -333,12 +317,8 @@
                   </div>
                 </td>
                 <td><span class="badge badge-blue">{{ u.role }}</span></td>
-                <td class="mono">
-                  {% if u.created_at %}{{ u.created_at|string[:10] }}{% else %}—{% endif %}
-                </td>
-                <td class="mono">
-                  {% if u.last_login %}{{ u.last_login|string[:16]|replace('T',' ') }}{% else %}Never{% endif %}
-                </td>
+                <td class="mono">{{ u.created_at if u.created_at else '—' }}</td>
+                <td class="mono">{{ u.last_login if u.last_login else 'Never' }}</td>
                 <td>
                   <a href="/admin/delete_user/{{ u.username }}"
                      onclick="return confirm('Delete user {{ u.username }}?')"
@@ -378,7 +358,7 @@
             <tbody>
               {% for loc in locations %}
               <tr>
-                <td class="mono">{{ loc.timestamp|string[:16]|replace('T',' ') }}</td>
+                <td class="mono">{{ loc.timestamp }}</td>
                 <td>
                   <div style="display:flex;align-items:center;gap:8px">
                     <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">
@@ -389,14 +369,12 @@
                 </td>
                 <td class="mono">{{ loc.latitude  or '—' }}</td>
                 <td class="mono">{{ loc.longitude or '—' }}</td>
-                <td class="mono">{{ ('±' + loc.accuracy|string + 'm') if loc.accuracy else '—' }}</td>
+                <td class="mono">{{ ('±' + loc.accuracy + 'm') if loc.accuracy else '—' }}</td>
                 <td>
-                  {% if loc.gps_enabled == 'True' or loc.gps_enabled == 'google' %}
-                    {% if loc.gps_enabled == 'google' %}
-                      <span class="badge badge-blue">🌐 Network</span>
-                    {% else %}
-                      <span class="badge badge-green">✓ GPS</span>
-                    {% endif %}
+                  {% if loc.gps_enabled == 'google' %}
+                    <span class="badge badge-blue">🌐 Network</span>
+                  {% elif loc.gps_enabled == 'True' %}
+                    <span class="badge badge-green">✓ GPS</span>
                   {% else %}
                     <span class="badge badge-red">✕ Denied</span>
                   {% endif %}
@@ -432,7 +410,7 @@
             <tbody>
               {% for log in logs %}
               <tr>
-                <td class="mono">{{ log.timestamp|string[:16]|replace('T',' ') }}</td>
+                <td class="mono">{{ log.timestamp }}</td>
                 <td>{{ log.username or '—' }}</td>
                 <td>
                   {% if log.action == 'LOGIN' %}
@@ -504,7 +482,6 @@ document.getElementById("modalOverlay").addEventListener("click", e => {
 });
 
 /* ── Section switching ── */
-// 'el' is passed explicitly — avoids relying on global 'event' object
 const sectionMeta = {
   overview:  ["Dashboard Overview",  "Monitor and manage your WeatherSphere platform"],
   users:     ["User Management",      "Create, view and manage user accounts"],
@@ -513,30 +490,22 @@ const sectionMeta = {
 };
 
 function showSection(section, el) {
-  // Update active nav item
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
   if (el) el.classList.add("active");
 
-  // Update page title
   const meta = sectionMeta[section] || ["Admin Panel", ""];
   document.getElementById("pageTitle").textContent    = meta[0];
   document.getElementById("pageSubtitle").textContent = meta[1];
 
-  // Show/hide content sections
   ["sec-users", "sec-locations", "sec-activity"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (section === "overview") {
-      el.style.display = "block";   // overview shows everything
-    } else {
-      el.style.display = (id === "sec-" + section) ? "block" : "none";
-    }
+    const sec = document.getElementById(id);
+    if (!sec) return;
+    sec.style.display = (section === "overview" || id === "sec-" + section) ? "block" : "none";
   });
 }
 
 /* ── Auto-open modal if redirected back with error ── */
-const params = new URLSearchParams(window.location.search);
-if (params.get("error")) openModal();
+if (new URLSearchParams(window.location.search).get("error")) openModal();
 </script>
 </body>
 </html>
