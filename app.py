@@ -13,12 +13,11 @@ def get_db():
     db_url = os.environ.get("DATABASE_URL", "")
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
-    # Render sometimes gives 'postgres://' but psycopg2 needs 'postgresql://'
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(db_url, sslmode="require")
 
-# ── DB init (called once on startup) ─────────────────────
+# ── DB init ───────────────────────────────────────────────
 
 def init_db():
     with get_db() as conn:
@@ -54,7 +53,6 @@ def init_db():
                     gps_enabled TEXT
                 )
             """)
-            # Seed default admin only if not already present
             cur.execute("SELECT 1 FROM users WHERE username = 'admin'")
             if not cur.fetchone():
                 cur.execute(
@@ -68,6 +66,18 @@ def init_db():
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+def fmt_rows(rows):
+    """Convert all datetime fields to clean 'YYYY-MM-DD HH:MM' strings
+       so Jinja2 never receives a datetime object."""
+    result = []
+    for row in rows:
+        r = dict(row)
+        for k, v in r.items():
+            if isinstance(v, datetime):
+                r[k] = v.strftime("%Y-%m-%d %H:%M")
+        result.append(r)
+    return result
+
 def log_activity(username, action, details=""):
     try:
         with get_db() as conn:
@@ -78,7 +88,7 @@ def log_activity(username, action, details=""):
                 )
             conn.commit()
     except Exception:
-        pass  # never let logging crash the app
+        pass
 
 def get_user(username):
     with get_db() as conn:
@@ -93,7 +103,6 @@ def update_last_login(username):
         conn.commit()
 
 # ── Startup ───────────────────────────────────────────────
-# Wrapped so a bad DB URL shows a clear error instead of a cryptic 500
 
 try:
     init_db()
@@ -102,30 +111,23 @@ except Exception as e:
     print(f"❌ Database init failed: {e}")
     traceback.print_exc()
 
-# ── Health check (visit /health to diagnose issues) ───────
+# ── Health check ──────────────────────────────────────────
 
 @app.route("/health")
 def health():
     status = {}
-    # 1. Check env var
-    db_url = os.environ.get("DATABASE_URL", "")
-    status["DATABASE_URL_set"] = bool(db_url)
+    status["DATABASE_URL_set"]  = bool(os.environ.get("DATABASE_URL", ""))
     status["GOOGLE_API_KEY_set"] = bool(os.environ.get("GOOGLE_MAPS_API_KEY", ""))
-
-    # 2. Try connecting
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT COUNT(*) FROM users")
-                count = cur.fetchone()[0]
+                status["user_count"] = cur.fetchone()[0]
         status["db_connected"] = True
-        status["user_count"]   = count
     except Exception as e:
         status["db_connected"] = False
         status["db_error"]     = str(e)
-
-    ok = status.get("db_connected", False)
-    return jsonify(status), 200 if ok else 500
+    return jsonify(status), 200 if status.get("db_connected") else 500
 
 # ── Auth ──────────────────────────────────────────────────
 
@@ -253,16 +255,28 @@ def admin_dashboard():
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM users WHERE role != 'admin' ORDER BY created_at DESC")
                 users = cur.fetchall()
+
                 cur.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 50")
                 logs = cur.fetchall()
+
                 cur.execute("SELECT * FROM location_logs ORDER BY timestamp DESC LIMIT 50")
                 locations = cur.fetchall()
+
                 cur.execute("SELECT COUNT(*) as c FROM activity_logs WHERE action='LOGIN'")
                 total_logins = cur.fetchone()["c"]
+
                 cur.execute("SELECT COUNT(*) as c FROM location_logs WHERE gps_enabled='True'")
                 gps_enabled = cur.fetchone()["c"]
+
                 cur.execute("SELECT COUNT(*) as c FROM location_logs")
                 total_locations = cur.fetchone()["c"]
+
+        # Format all datetime fields BEFORE passing to Jinja2
+        # Jinja2 cannot slice datetime objects — they must be plain strings
+        users     = fmt_rows(users)
+        logs      = fmt_rows(logs)
+        locations = fmt_rows(locations)
+
         stats = {
             "total_users"    : len(users),
             "total_logins"   : total_logins,
@@ -272,7 +286,7 @@ def admin_dashboard():
         return render_template("admin_dashboard.html",
                                users=users, logs=logs,
                                locations=locations, stats=stats)
-    except Exception as e:
+    except Exception:
         return f"<h2>Admin dashboard error:</h2><pre>{traceback.format_exc()}</pre>", 500
 
 @app.route("/admin/create_user", methods=["POST"])
