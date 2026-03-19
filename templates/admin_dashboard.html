@@ -26,28 +26,26 @@
       radial-gradient(ellipse 50% 40% at 100% 100%, rgba(8,145,178,0.08) 0%, transparent 60%);
   }
 
-  /* Layout */
   .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
 
-  /* Sidebar */
   aside {
     width:240px; flex-shrink:0;
-    background: rgba(13,19,32,0.95);
-    border-right: 1px solid var(--border);
+    background:rgba(13,19,32,0.95);
+    border-right:1px solid var(--border);
     display:flex; flex-direction:column;
     position:sticky; top:0; height:100vh;
-    backdrop-filter: blur(20px);
+    backdrop-filter:blur(20px);
   }
 
   .sidebar-brand {
-    padding: 24px 20px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Space Mono', monospace;
+    padding:24px 20px;
+    border-bottom:1px solid var(--border);
+    font-family:'Space Mono',monospace;
   }
   .sidebar-brand .logo {
     display:flex; align-items:center; gap:10px;
     font-size:15px; font-weight:700;
-    background: linear-gradient(135deg,#93c5fd,#67e8f9);
+    background:linear-gradient(135deg,#93c5fd,#67e8f9);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     margin-bottom:4px;
   }
@@ -64,7 +62,6 @@
     font-size:10px; text-transform:uppercase; letter-spacing:0.1em;
     color:var(--muted); padding:0 8px; margin-bottom:8px; font-weight:600;
   }
-
   .nav-item {
     display:flex; align-items:center; gap:10px;
     padding:9px 12px; border-radius:10px;
@@ -76,10 +73,7 @@
   .nav-item.active { background:rgba(59,130,246,0.15); color:var(--blue); }
   .nav-item .ni { font-size:16px; }
 
-  .side-footer {
-    padding:16px;
-    border-top:1px solid var(--border);
-  }
+  .side-footer { padding:16px; border-top:1px solid var(--border); }
   .admin-info { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
   .admin-avatar {
     width:36px; height:36px; border-radius:10px;
@@ -88,19 +82,17 @@
     font-size:14px; font-weight:700; color:#fff; flex-shrink:0;
   }
   .admin-name { font-size:13px; font-weight:600; color:var(--text); }
-  .admin-sub { font-size:11px; color:var(--muted); }
+  .admin-sub  { font-size:11px; color:var(--muted); }
 
   .btn-logout-side {
     display:block; width:100%; padding:9px;
     background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);
     border-radius:9px; text-align:center;
     color:var(--red); font-size:13px; font-weight:500;
-    text-decoration:none; transition:all 0.2s;
-    font-family:'Outfit',sans-serif;
+    text-decoration:none; transition:all 0.2s; font-family:'Outfit',sans-serif;
   }
   .btn-logout-side:hover { background:rgba(239,68,68,0.2); }
 
-  /* Main content */
   main { flex:1; overflow:auto; }
 
   .topbar {
@@ -110,13 +102,11 @@
     background:rgba(6,10,20,0.6); backdrop-filter:blur(20px);
     position:sticky; top:0; z-index:5;
   }
-
   .page-title h1 { font-size:22px; font-weight:700; color:var(--text); }
-  .page-title p { font-size:13px; color:var(--muted); margin-top:2px; }
-
+  .page-title p  { font-size:13px; color:var(--muted); margin-top:2px; }
   .topbar-actions { display:flex; gap:10px; }
 
-  .btn { 
+  .btn {
     padding:9px 18px; border-radius:9px; font-size:13px; font-weight:600;
     cursor:pointer; transition:all 0.2s; text-decoration:none;
     font-family:'Outfit',sans-serif; border:none;
@@ -124,48 +114,34 @@
   }
   .btn-primary { background:linear-gradient(135deg,var(--blue),#1d4ed8); color:#fff; box-shadow:0 4px 14px rgba(59,130,246,0.35); }
   .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(59,130,246,0.45); }
-  .btn-ghost { background:var(--panel); border:1px solid var(--border); color:var(--light); }
+  .btn-ghost  { background:var(--panel); border:1px solid var(--border); color:var(--light); }
   .btn-ghost:hover { background:rgba(255,255,255,0.08); color:var(--text); }
-  .btn-green { background:linear-gradient(135deg,var(--green),#059669); color:#fff; }
-  .btn-amber { background:linear-gradient(135deg,var(--amber),#d97706); color:#fff; }
+  .btn-green  { background:linear-gradient(135deg,var(--green),#059669); color:#fff; }
+  .btn-amber  { background:linear-gradient(135deg,var(--amber),#d97706); color:#fff; }
 
   .content { padding:28px 32px; }
 
-  /* Stats */
   .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
   .stat-card {
     background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px;
     position:relative; overflow:hidden; transition:border-color 0.2s;
   }
   .stat-card:hover { border-color:rgba(59,130,246,0.25); }
-  .stat-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  }
-  .sc-blue::before { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
-  .sc-green::before { background:linear-gradient(90deg,var(--green),#34d399); }
-  .sc-amber::before { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .sc-blue::before   { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+  .sc-green::before  { background:linear-gradient(90deg,var(--green),#34d399); }
+  .sc-amber::before  { background:linear-gradient(90deg,var(--amber),#fbbf24); }
   .sc-purple::before { background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
-
   .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; font-weight:600; }
   .stat-value { font-size:36px; font-weight:800; color:var(--text); line-height:1; }
-  .stat-icon { position:absolute; right:20px; top:20px; font-size:24px; opacity:0.4; }
+  .stat-icon  { position:absolute; right:20px; top:20px; font-size:24px; opacity:0.4; }
 
-  /* Sections */
   .section { margin-bottom:28px; }
-  .section-head {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:16px;
-  }
+  .section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .section-head h2 { font-size:16px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
-  .count-badge {
-    font-size:11px; background:rgba(59,130,246,0.15); color:var(--blue);
-    border-radius:20px; padding:2px 8px; font-weight:600;
-  }
+  .count-badge { font-size:11px; background:rgba(59,130,246,0.15); color:var(--blue); border-radius:20px; padding:2px 8px; font-weight:600; }
 
-  /* Table */
-  .table-wrap {
-    background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden;
-  }
+  .table-wrap { background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
   table { width:100%; border-collapse:collapse; }
   th {
     text-align:left; padding:12px 16px;
@@ -184,15 +160,14 @@
     display:inline-flex; align-items:center; gap:4px;
     padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;
   }
-  .badge-blue { background:rgba(59,130,246,0.15); color:#93c5fd; }
-  .badge-green { background:rgba(16,185,129,0.15); color:#6ee7b7; }
-  .badge-red { background:rgba(239,68,68,0.15); color:#fca5a5; }
-  .badge-amber { background:rgba(245,158,11,0.15); color:#fcd34d; }
-  .badge-purple { background:rgba(139,92,246,0.15); color:#c4b5fd; }
+  .badge-blue   { background:rgba(59,130,246,0.15);  color:#93c5fd; }
+  .badge-green  { background:rgba(16,185,129,0.15);  color:#6ee7b7; }
+  .badge-red    { background:rgba(239,68,68,0.15);   color:#fca5a5; }
+  .badge-amber  { background:rgba(245,158,11,0.15);  color:#fcd34d; }
+  .badge-purple { background:rgba(139,92,246,0.15);  color:#c4b5fd; }
 
   .mono { font-family:'Space Mono',monospace; font-size:11px; }
 
-  /* Modal */
   .modal-overlay {
     position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px);
     z-index:100; display:none; align-items:center; justify-content:center;
@@ -203,9 +178,9 @@
     padding:32px; width:100%; max-width:420px; box-shadow:0 40px 80px rgba(0,0,0,0.5);
     animation:modalIn 0.25s ease;
   }
-  @keyframes modalIn { from{opacity:0;transform:scale(0.95)translateY(10px)} to{opacity:1;transform:none} }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:none} }
   .modal h2 { font-size:18px; font-weight:700; margin-bottom:6px; }
-  .modal p { font-size:13px; color:var(--muted); margin-bottom:24px; }
+  .modal p  { font-size:13px; color:var(--muted); margin-bottom:24px; }
   .modal .field { margin-bottom:16px; }
   .modal label { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
   .modal input {
@@ -217,7 +192,12 @@
   .modal input:focus { border-color:var(--blue); background:rgba(59,130,246,0.08); }
   .modal-actions { display:flex; gap:10px; margin-top:8px; }
 
-  /* Scrollbar */
+  .alert {
+    padding:12px 18px; border-radius:10px; font-size:13px;
+    margin-bottom:20px; display:flex; align-items:center; gap:8px;
+  }
+  .alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#fca5a5; }
+
   ::-webkit-scrollbar { width:6px; height:6px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
@@ -246,19 +226,19 @@
     <nav class="side-nav">
       <div class="nav-group">
         <div class="nav-group-label">Overview</div>
-        <a class="nav-item active" onclick="showSection('overview')">
+        <a class="nav-item active" id="nav-overview" onclick="showSection('overview', this)">
           <span class="ni">📊</span> Dashboard
         </a>
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Management</div>
-        <a class="nav-item" onclick="showSection('users')">
+        <a class="nav-item" id="nav-users" onclick="showSection('users', this)">
           <span class="ni">👥</span> Users
         </a>
-        <a class="nav-item" onclick="showSection('locations')">
+        <a class="nav-item" id="nav-locations" onclick="showSection('locations', this)">
           <span class="ni">📍</span> Location Logs
         </a>
-        <a class="nav-item" onclick="showSection('activity')">
+        <a class="nav-item" id="nav-activity" onclick="showSection('activity', this)">
           <span class="ni">📋</span> Activity Logs
         </a>
       </div>
@@ -294,6 +274,11 @@
     </div>
 
     <div class="content">
+
+      {% if request.args.get('error') %}
+      <div class="alert alert-error">⚠ {{ request.args.get('error') }}</div>
+      {% endif %}
+
       <!-- Stats -->
       <div class="stats-grid">
         <div class="stat-card sc-blue">
@@ -318,13 +303,11 @@
         </div>
       </div>
 
-      <!-- Users Section -->
+      <!-- Users -->
       <div class="section" id="sec-users">
         <div class="section-head">
           <h2>👥 Users <span class="count-badge">{{ users|length }}</span></h2>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="openModal()">＋ New User</button>
-          </div>
+          <button class="btn btn-primary" onclick="openModal()">＋ New User</button>
         </div>
         <div class="table-wrap">
           {% if users %}
@@ -350,8 +333,12 @@
                   </div>
                 </td>
                 <td><span class="badge badge-blue">{{ u.role }}</span></td>
-                <td class="mono">{{ u.created_at[:10] if u.created_at else '—' }}</td>
-                <td class="mono">{{ u.last_login[:16].replace('T',' ') if u.last_login else 'Never' }}</td>
+                <td class="mono">
+                  {% if u.created_at %}{{ u.created_at|string[:10] }}{% else %}—{% endif %}
+                </td>
+                <td class="mono">
+                  {% if u.last_login %}{{ u.last_login|string[:16]|replace('T',' ') }}{% else %}Never{% endif %}
+                </td>
                 <td>
                   <a href="/admin/delete_user/{{ u.username }}"
                      onclick="return confirm('Delete user {{ u.username }}?')"
@@ -369,7 +356,7 @@
         </div>
       </div>
 
-      <!-- Locations Section -->
+      <!-- Location Logs -->
       <div class="section" id="sec-locations">
         <div class="section-head">
           <h2>📍 Location Logs <span class="count-badge">{{ locations|length }}</span></h2>
@@ -391,23 +378,27 @@
             <tbody>
               {% for loc in locations %}
               <tr>
-                <td class="mono">{{ loc.timestamp[:16].replace('T',' ') }}</td>
+                <td class="mono">{{ loc.timestamp|string[:16]|replace('T',' ') }}</td>
                 <td>
                   <div style="display:flex;align-items:center;gap:8px">
                     <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">
                       {{ loc.username[0].upper() if loc.username else '?' }}
                     </div>
-                    {{ loc.username }}
+                    {{ loc.username or '—' }}
                   </div>
                 </td>
-                <td class="mono">{{ loc.latitude or '—' }}</td>
+                <td class="mono">{{ loc.latitude  or '—' }}</td>
                 <td class="mono">{{ loc.longitude or '—' }}</td>
-                <td class="mono">{{ ('±' + loc.accuracy + 'm') if loc.accuracy else '—' }}</td>
+                <td class="mono">{{ ('±' + loc.accuracy|string + 'm') if loc.accuracy else '—' }}</td>
                 <td>
-                  {% if loc.gps_enabled == 'True' %}
-                  <span class="badge badge-green">✓ Enabled</span>
+                  {% if loc.gps_enabled == 'True' or loc.gps_enabled == 'google' %}
+                    {% if loc.gps_enabled == 'google' %}
+                      <span class="badge badge-blue">🌐 Network</span>
+                    {% else %}
+                      <span class="badge badge-green">✓ GPS</span>
+                    {% endif %}
                   {% else %}
-                  <span class="badge badge-red">✕ Denied</span>
+                    <span class="badge badge-red">✕ Denied</span>
                   {% endif %}
                 </td>
               </tr>
@@ -420,7 +411,7 @@
         </div>
       </div>
 
-      <!-- Activity Logs Section -->
+      <!-- Activity Logs -->
       <div class="section" id="sec-activity">
         <div class="section-head">
           <h2>📋 Activity Logs <span class="count-badge">{{ logs|length }}</span></h2>
@@ -441,21 +432,30 @@
             <tbody>
               {% for log in logs %}
               <tr>
-                <td class="mono">{{ log.timestamp[:16].replace('T',' ') }}</td>
-                <td>{{ log.username }}</td>
+                <td class="mono">{{ log.timestamp|string[:16]|replace('T',' ') }}</td>
+                <td>{{ log.username or '—' }}</td>
                 <td>
-                  {% if log.action == 'LOGIN' %}<span class="badge badge-green">🔑 LOGIN</span>
-                  {% elif log.action == 'LOGOUT' %}<span class="badge badge-blue">🚪 LOGOUT</span>
-                  {% elif log.action == 'GPS_DENIED' %}<span class="badge badge-red">📵 GPS DENIED</span>
-                  {% elif log.action == 'LOCATION_SAVED' %}<span class="badge badge-purple">📍 LOCATION</span>
-                  {% elif log.action == 'CREATE_USER' %}<span class="badge badge-green">➕ CREATED</span>
-                  {% elif log.action == 'DELETE_USER' %}<span class="badge badge-red">🗑 DELETED</span>
-                  {% elif log.action == 'BACKUP_CREATED' %}<span class="badge badge-amber">💾 BACKUP</span>
-                  {% elif 'EXPORT' in log.action %}<span class="badge badge-amber">⬇ EXPORT</span>
-                  {% else %}<span class="badge badge-blue">{{ log.action }}</span>
+                  {% if log.action == 'LOGIN' %}
+                    <span class="badge badge-green">🔑 LOGIN</span>
+                  {% elif log.action == 'LOGOUT' %}
+                    <span class="badge badge-blue">🚪 LOGOUT</span>
+                  {% elif log.action == 'GPS_DENIED' %}
+                    <span class="badge badge-red">📵 GPS DENIED</span>
+                  {% elif log.action == 'LOCATION_SAVED' %}
+                    <span class="badge badge-purple">📍 LOCATION</span>
+                  {% elif log.action == 'CREATE_USER' %}
+                    <span class="badge badge-green">➕ CREATED</span>
+                  {% elif log.action == 'DELETE_USER' %}
+                    <span class="badge badge-red">🗑 DELETED</span>
+                  {% elif log.action == 'BACKUP_CREATED' %}
+                    <span class="badge badge-amber">💾 BACKUP</span>
+                  {% elif 'EXPORT' in log.action %}
+                    <span class="badge badge-amber">⬇ EXPORT</span>
+                  {% else %}
+                    <span class="badge badge-blue">{{ log.action }}</span>
                   {% endif %}
                 </td>
-                <td class="mono">{{ log.ip }}</td>
+                <td class="mono">{{ log.ip or '—' }}</td>
                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--muted)">
                   {{ log.details or '—' }}
                 </td>
@@ -468,6 +468,7 @@
           {% endif %}
         </div>
       </div>
+
     </div>
   </main>
 </div>
@@ -495,38 +496,47 @@
 </div>
 
 <script>
-function openModal() {
-  document.getElementById("modalOverlay").classList.add("open");
-}
-function closeModal() {
-  document.getElementById("modalOverlay").classList.remove("open");
-}
+/* ── Modal ── */
+function openModal()  { document.getElementById("modalOverlay").classList.add("open"); }
+function closeModal() { document.getElementById("modalOverlay").classList.remove("open"); }
 document.getElementById("modalOverlay").addEventListener("click", e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-const navItems = document.querySelectorAll('.nav-item');
-const titles = {
-  overview: ['Dashboard Overview', 'Monitor and manage your WeatherSphere platform'],
-  users: ['User Management', 'Create, view and manage user accounts'],
-  locations: ['Location Logs', 'View and export user GPS location data'],
-  activity: ['Activity Logs', 'Monitor all user activity and system events'],
+/* ── Section switching ── */
+// 'el' is passed explicitly — avoids relying on global 'event' object
+const sectionMeta = {
+  overview:  ["Dashboard Overview",  "Monitor and manage your WeatherSphere platform"],
+  users:     ["User Management",      "Create, view and manage user accounts"],
+  locations: ["Location Logs",        "View and export user GPS location data"],
+  activity:  ["Activity Logs",        "Monitor all user activity and system events"],
 };
 
-function showSection(section) {
-  navItems.forEach(n => n.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+function showSection(section, el) {
+  // Update active nav item
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  if (el) el.classList.add("active");
 
-  const t = titles[section] || ['Admin Panel',''];
-  document.getElementById('pageTitle').textContent = t[0];
-  document.getElementById('pageSubtitle').textContent = t[1];
+  // Update page title
+  const meta = sectionMeta[section] || ["Admin Panel", ""];
+  document.getElementById("pageTitle").textContent    = meta[0];
+  document.getElementById("pageSubtitle").textContent = meta[1];
 
-  const sections = ['sec-users','sec-locations','sec-activity'];
-  sections.forEach(s => {
-    const el = document.getElementById(s);
-    if (el) el.style.display = (s === `sec-${section}` || section === 'overview') ? 'block' : 'none';
+  // Show/hide content sections
+  ["sec-users", "sec-locations", "sec-activity"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (section === "overview") {
+      el.style.display = "block";   // overview shows everything
+    } else {
+      el.style.display = (id === "sec-" + section) ? "block" : "none";
+    }
   });
 }
+
+/* ── Auto-open modal if redirected back with error ── */
+const params = new URLSearchParams(window.location.search);
+if (params.get("error")) openModal();
 </script>
 </body>
 </html>
