@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherSphere — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #060a14;
+    --surface: #0d1320;
+    --panel: rgba(255,255,255,0.035);
+    --border: rgba(255,255,255,0.07);
+    --blue: #3b82f6; --cyan: #06b6d4;
+    --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+    --text: #e2e8f0; --muted: #64748b; --light: #94a3b8;
+  }
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  .bg-accent {
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 70% 50% at 0% 0%, rgba(29,78,216,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 100% 100%, rgba(8,145,178,0.08) 0%, transparent 60%);
+  }
+
+  /* Layout */
+  .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+  /* Sidebar */
+  aside {
+    width:240px; flex-shrink:0;
+    background: rgba(13,19,32,0.95);
+    border-right: 1px solid var(--border);
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+    backdrop-filter: blur(20px);
+  }
+
+  .sidebar-brand {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+  }
+  .sidebar-brand .logo {
+    display:flex; align-items:center; gap:10px;
+    font-size:15px; font-weight:700;
+    background: linear-gradient(135deg,#93c5fd,#67e8f9);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:4px;
+  }
+  .sidebar-brand .role-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:10px; color:var(--amber); background:rgba(245,158,11,0.1);
+    border:1px solid rgba(245,158,11,0.2); border-radius:4px; padding:2px 8px;
+    font-family:'Space Mono',monospace; letter-spacing:0.05em;
+  }
+
+  nav.side-nav { flex:1; padding:16px 12px; }
+  .nav-group { margin-bottom:24px; }
+  .nav-group-label {
+    font-size:10px; text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--muted); padding:0 8px; margin-bottom:8px; font-weight:600;
+  }
+
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:9px 12px; border-radius:10px;
+    color:var(--muted); font-size:14px; font-weight:500;
+    cursor:pointer; transition:all 0.15s; margin-bottom:2px;
+    text-decoration:none;
+  }
+  .nav-item:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+  .nav-item.active { background:rgba(59,130,246,0.15); color:var(--blue); }
+  .nav-item .ni { font-size:16px; }
+
+  .side-footer {
+    padding:16px;
+    border-top:1px solid var(--border);
+  }
+  .admin-info { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .admin-avatar {
+    width:36px; height:36px; border-radius:10px;
+    background:linear-gradient(135deg,var(--amber),#d97706);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; color:#fff; flex-shrink:0;
+  }
+  .admin-name { font-size:13px; font-weight:600; color:var(--text); }
+  .admin-sub { font-size:11px; color:var(--muted); }
+
+  .btn-logout-side {
+    display:block; width:100%; padding:9px;
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);
+    border-radius:9px; text-align:center;
+    color:var(--red); font-size:13px; font-weight:500;
+    text-decoration:none; transition:all 0.2s;
+    font-family:'Outfit',sans-serif;
+  }
+  .btn-logout-side:hover { background:rgba(239,68,68,0.2); }
+
+  /* Main content */
+  main { flex:1; overflow:auto; }
+
+  .topbar {
+    padding:20px 32px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(6,10,20,0.6); backdrop-filter:blur(20px);
+    position:sticky; top:0; z-index:5;
+  }
+
+  .page-title h1 { font-size:22px; font-weight:700; color:var(--text); }
+  .page-title p { font-size:13px; color:var(--muted); margin-top:2px; }
+
+  .topbar-actions { display:flex; gap:10px; }
+
+  .btn { 
+    padding:9px 18px; border-radius:9px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all 0.2s; text-decoration:none;
+    font-family:'Outfit',sans-serif; border:none;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary { background:linear-gradient(135deg,var(--blue),#1d4ed8); color:#fff; box-shadow:0 4px 14px rgba(59,130,246,0.35); }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(59,130,246,0.45); }
+  .btn-ghost { background:var(--panel); border:1px solid var(--border); color:var(--light); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+  .btn-green { background:linear-gradient(135deg,var(--green),#059669); color:#fff; }
+  .btn-amber { background:linear-gradient(135deg,var(--amber),#d97706); color:#fff; }
+
+  .content { padding:28px 32px; }
+
+  /* Stats */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+  .stat-card {
+    background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px;
+    position:relative; overflow:hidden; transition:border-color 0.2s;
+  }
+  .stat-card:hover { border-color:rgba(59,130,246,0.25); }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  }
+  .sc-blue::before { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+  .sc-green::before { background:linear-gradient(90deg,var(--green),#34d399); }
+  .sc-amber::before { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+  .sc-purple::before { background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
+
+  .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; font-weight:600; }
+  .stat-value { font-size:36px; font-weight:800; color:var(--text); line-height:1; }
+  .stat-icon { position:absolute; right:20px; top:20px; font-size:24px; opacity:0.4; }
+
+  /* Sections */
+  .section { margin-bottom:28px; }
+  .section-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .section-head h2 { font-size:16px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .count-badge {
+    font-size:11px; background:rgba(59,130,246,0.15); color:var(--blue);
+    border-radius:20px; padding:2px 8px; font-weight:600;
+  }
+
+  /* Table */
+  .table-wrap {
+    background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+  }
+  table { width:100%; border-collapse:collapse; }
+  th {
+    text-align:left; padding:12px 16px;
+    font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
+    color:var(--muted); background:rgba(255,255,255,0.02);
+    border-bottom:1px solid var(--border);
+  }
+  td {
+    padding:12px 16px; font-size:13px; color:var(--light);
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  .badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;
+  }
+  .badge-blue { background:rgba(59,130,246,0.15); color:#93c5fd; }
+  .badge-green { background:rgba(16,185,129,0.15); color:#6ee7b7; }
+  .badge-red { background:rgba(239,68,68,0.15); color:#fca5a5; }
+  .badge-amber { background:rgba(245,158,11,0.15); color:#fcd34d; }
+  .badge-purple { background:rgba(139,92,246,0.15); color:#c4b5fd; }
+
+  .mono { font-family:'Space Mono',monospace; font-size:11px; }
+
+  /* Modal */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px);
+    z-index:100; display:none; align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:32px; width:100%; max-width:420px; box-shadow:0 40px 80px rgba(0,0,0,0.5);
+    animation:modalIn 0.25s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95)translateY(10px)} to{opacity:1;transform:none} }
+  .modal h2 { font-size:18px; font-weight:700; margin-bottom:6px; }
+  .modal p { font-size:13px; color:var(--muted); margin-bottom:24px; }
+  .modal .field { margin-bottom:16px; }
+  .modal label { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
+  .modal input {
+    width:100%; padding:11px 14px;
+    background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:9px; color:var(--text); font-size:14px;
+    font-family:'Outfit',sans-serif; outline:none; transition:all 0.2s;
+  }
+  .modal input:focus { border-color:var(--blue); background:rgba(59,130,246,0.08); }
+  .modal-actions { display:flex; gap:10px; margin-top:8px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+
+  .empty-state { text-align:center; padding:48px 24px; color:var(--muted); font-size:14px; }
+  .empty-state .icon { font-size:36px; margin-bottom:12px; opacity:0.5; }
+
+  @media(max-width:768px) {
+    .layout { flex-direction:column; }
+    aside { width:100%; height:auto; position:relative; }
+    .content { padding:16px; }
+    .topbar { padding:16px; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-accent"></div>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-brand">
+      <div class="logo">🌤 WeatherSphere</div>
+      <span class="role-badge">⚡ ADMIN PANEL</span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">
+        <div class="nav-group-label">Overview</div>
+        <a class="nav-item active" onclick="showSection('overview')">
+          <span class="ni">📊</span> Dashboard
+        </a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Management</div>
+        <a class="nav-item" onclick="showSection('users')">
+          <span class="ni">👥</span> Users
+        </a>
+        <a class="nav-item" onclick="showSection('locations')">
+          <span class="ni">📍</span> Location Logs
+        </a>
+        <a class="nav-item" onclick="showSection('activity')">
+          <span class="ni">📋</span> Activity Logs
+        </a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">System</div>
+        <a class="nav-item" href="/admin/backup">
+          <span class="ni">💾</span> Create Backup
+        </a>
+      </div>
+    </nav>
+    <div class="side-footer">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Administrator</div>
+          <div class="admin-sub">Full Access</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout-side">Sign out</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="topbar">
+      <div class="page-title">
+        <h1 id="pageTitle">Dashboard Overview</h1>
+        <p id="pageSubtitle">Monitor and manage your WeatherSphere platform</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="openModal()">＋ Add User</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card sc-blue">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value">{{ stats.total_users }}</div>
+        </div>
+        <div class="stat-card sc-green">
+          <div class="stat-icon">🔑</div>
+          <div class="stat-label">Total Logins</div>
+          <div class="stat-value">{{ stats.total_logins }}</div>
+        </div>
+        <div class="stat-card sc-amber">
+          <div class="stat-icon">📡</div>
+          <div class="stat-label">GPS Enabled</div>
+          <div class="stat-value">{{ stats.gps_enabled }}</div>
+        </div>
+        <div class="stat-card sc-purple">
+          <div class="stat-icon">📍</div>
+          <div class="stat-label">Location Records</div>
+          <div class="stat-value">{{ stats.total_locations }}</div>
+        </div>
+      </div>
+
+      <!-- Users Section -->
+      <div class="section" id="sec-users">
+        <div class="section-head">
+          <h2>👥 Users <span class="count-badge">{{ users|length }}</span></h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="openModal()">＋ New User</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          {% if users %}
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">
+                      {{ u.username[0].upper() }}
+                    </div>
+                    {{ u.username }}
+                  </div>
+                </td>
+                <td><span class="badge badge-blue">{{ u.role }}</span></td>
+                <td class="mono">{{ u.created_at[:10] if u.created_at else '—' }}</td>
+                <td class="mono">{{ u.last_login[:16].replace('T',' ') if u.last_login else 'Never' }}</td>
+                <td>
+                  <a href="/admin/delete_user/{{ u.username }}"
+                     onclick="return confirm('Delete user {{ u.username }}?')"
+                     class="btn btn-ghost" style="padding:5px 12px;font-size:12px;color:#f87171;border-color:rgba(239,68,68,0.2)">
+                    🗑 Delete
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state"><div class="icon">👥</div>No users yet. Create one to get started.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Locations Section -->
+      <div class="section" id="sec-locations">
+        <div class="section-head">
+          <h2>📍 Location Logs <span class="count-badge">{{ locations|length }}</span></h2>
+          <a href="/admin/export_locations" class="btn btn-green">⬇ Export CSV</a>
+        </div>
+        <div class="table-wrap">
+          {% if locations %}
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Accuracy</th>
+                <th>GPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for loc in locations %}
+              <tr>
+                <td class="mono">{{ loc.timestamp[:16].replace('T',' ') }}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">
+                      {{ loc.username[0].upper() if loc.username else '?' }}
+                    </div>
+                    {{ loc.username }}
+                  </div>
+                </td>
+                <td class="mono">{{ loc.latitude or '—' }}</td>
+                <td class="mono">{{ loc.longitude or '—' }}</td>
+                <td class="mono">{{ ('±' + loc.accuracy + 'm') if loc.accuracy else '—' }}</td>
+                <td>
+                  {% if loc.gps_enabled == 'True' %}
+                  <span class="badge badge-green">✓ Enabled</span>
+                  {% else %}
+                  <span class="badge badge-red">✕ Denied</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state"><div class="icon">📍</div>No location records yet.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Activity Logs Section -->
+      <div class="section" id="sec-activity">
+        <div class="section-head">
+          <h2>📋 Activity Logs <span class="count-badge">{{ logs|length }}</span></h2>
+          <a href="/admin/export_logs" class="btn btn-amber">⬇ Export CSV</a>
+        </div>
+        <div class="table-wrap">
+          {% if logs %}
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>IP</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+              <tr>
+                <td class="mono">{{ log.timestamp[:16].replace('T',' ') }}</td>
+                <td>{{ log.username }}</td>
+                <td>
+                  {% if log.action == 'LOGIN' %}<span class="badge badge-green">🔑 LOGIN</span>
+                  {% elif log.action == 'LOGOUT' %}<span class="badge badge-blue">🚪 LOGOUT</span>
+                  {% elif log.action == 'GPS_DENIED' %}<span class="badge badge-red">📵 GPS DENIED</span>
+                  {% elif log.action == 'LOCATION_SAVED' %}<span class="badge badge-purple">📍 LOCATION</span>
+                  {% elif log.action == 'CREATE_USER' %}<span class="badge badge-green">➕ CREATED</span>
+                  {% elif log.action == 'DELETE_USER' %}<span class="badge badge-red">🗑 DELETED</span>
+                  {% elif log.action == 'BACKUP_CREATED' %}<span class="badge badge-amber">💾 BACKUP</span>
+                  {% elif 'EXPORT' in log.action %}<span class="badge badge-amber">⬇ EXPORT</span>
+                  {% else %}<span class="badge badge-blue">{{ log.action }}</span>
+                  {% endif %}
+                </td>
+                <td class="mono">{{ log.ip }}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--muted)">
+                  {{ log.details or '—' }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state"><div class="icon">📋</div>No activity logs yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Create New User</h2>
+    <p>Add a new user account. They can log in and view weather data.</p>
+    <form method="POST" action="/admin/create_user">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="e.g. john_doe" required autofocus>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Set a strong password" required>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary" style="flex:1">Create User</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModal() {
+  document.getElementById("modalOverlay").classList.add("open");
+}
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+document.getElementById("modalOverlay").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+const navItems = document.querySelectorAll('.nav-item');
+const titles = {
+  overview: ['Dashboard Overview', 'Monitor and manage your WeatherSphere platform'],
+  users: ['User Management', 'Create, view and manage user accounts'],
+  locations: ['Location Logs', 'View and export user GPS location data'],
+  activity: ['Activity Logs', 'Monitor all user activity and system events'],
+};
+
+function showSection(section) {
+  navItems.forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const t = titles[section] || ['Admin Panel',''];
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageSubtitle').textContent = t[1];
+
+  const sections = ['sec-users','sec-locations','sec-activity'];
+  sections.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = (s === `sec-${section}` || section === 'overview') ? 'block' : 'none';
+  });
+}
+</script>
+</body>
+</html>
