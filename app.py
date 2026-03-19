@@ -46,7 +46,6 @@ def write_csv(filepath, rows, fieldnames):
         w.writerows(rows)
 
 def append_csv(filepath, row):
-    file_exists = os.path.exists(filepath)
     with open(filepath, "a", newline="") as f:
         w = csv.writer(f)
         w.writerow(row)
@@ -196,6 +195,3 @@ def create_backup():
             zf.write(os.path.join(DATA_DIR, f), f)
     log_activity(session["username"], "BACKUP_CREATED", f"File: backup_{ts}.zip")
     return send_file(zip_path, as_attachment=True, download_name=f"backup_{ts}.zip")
-
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
