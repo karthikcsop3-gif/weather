@@ -481,7 +481,12 @@ async function reverseGeocode(lat, lon) {
     const res  = await fetch(`${GEO_API}?lat=${lat}&lon=${lon}&format=json`);
     const data = await res.json();
     const a    = data.address;
-    return a.city || a.town || a.village || a.county || "Your Location";
+
+    const area  = a.suburb || a.neighbourhood || a.quarter || a.hamlet || "";
+    const city  = a.city   || a.town          || a.village || a.county || "";
+    const state = a.state  || "";
+
+    return [area, city, state].filter(Boolean).join(", ") || "Your Location";
   } catch { return "Your Location"; }
 }
 
