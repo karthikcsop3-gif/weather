@@ -1,77 +1,91 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-import csv, os, hashlib, uuid, requests
+import os, hashlib, uuid, requests, csv, io, zipfile
 from datetime import datetime
-import zipfile
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
 app.secret_key = "weather_app_secret_key_2024_xK9#mP"
 
-DATA_DIR       = "data"
-BACKUP_DIR     = "backups"
-USERS_FILE     = os.path.join(DATA_DIR, "users.csv")
-LOGS_FILE      = os.path.join(DATA_DIR, "activity_logs.csv")
-LOCATIONS_FILE = os.path.join(DATA_DIR, "location_logs.csv")
+# ── Database connection ───────────────────────────────────
+# Render automatically sets DATABASE_URL when you attach a PostgreSQL instance.
 
-os.makedirs(DATA_DIR,   exist_ok=True)
-os.makedirs(BACKUP_DIR, exist_ok=True)
+def get_db():
+    return psycopg2.connect(os.environ["DATABASE_URL"], sslmode="require")
+
+def init_db():
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id          TEXT PRIMARY KEY,
+                    username    TEXT UNIQUE NOT NULL,
+                    password    TEXT NOT NULL,
+                    role        TEXT NOT NULL DEFAULT 'user',
+                    created_at  TIMESTAMP DEFAULT NOW(),
+                    last_login  TIMESTAMP
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activity_logs (
+                    id         TEXT PRIMARY KEY,
+                    timestamp  TIMESTAMP DEFAULT NOW(),
+                    username   TEXT,
+                    action     TEXT,
+                    ip         TEXT,
+                    details    TEXT
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS location_logs (
+                    id         TEXT PRIMARY KEY,
+                    timestamp  TIMESTAMP DEFAULT NOW(),
+                    username   TEXT,
+                    latitude   TEXT,
+                    longitude  TEXT,
+                    accuracy   TEXT,
+                    gps_enabled TEXT
+                )
+            """)
+            # Create default admin if not exists
+            cur.execute("SELECT 1 FROM users WHERE username = 'admin'")
+            if not cur.fetchone():
+                cur.execute(
+                    "INSERT INTO users (id, username, password, role) VALUES (%s, %s, %s, 'admin')",
+                    (str(uuid.uuid4()), "admin", hash_password("admin123"))
+                )
+        conn.commit()
 
 # ── Helpers ───────────────────────────────────────────────
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def init_db():
-    if not os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["id", "username", "password", "role", "created_at", "last_login"])
-            w.writerow([str(uuid.uuid4()), "admin", hash_password("admin123"),
-                        "admin", datetime.now().isoformat(), ""])
-    if not os.path.exists(LOGS_FILE):
-        with open(LOGS_FILE, "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["id", "timestamp", "username", "action", "ip", "details"])
-    if not os.path.exists(LOCATIONS_FILE):
-        with open(LOCATIONS_FILE, "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["id", "timestamp", "username",
-                        "latitude", "longitude", "accuracy", "gps_enabled"])
-
-def read_csv(filepath):
-    if not os.path.exists(filepath):
-        return []
-    with open(filepath, "r", newline="") as f:
-        return list(csv.DictReader(f))
-
-def write_csv(filepath, rows, fieldnames):
-    with open(filepath, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
-        w.writeheader()
-        w.writerows(rows)
-
-def append_csv(filepath, row):
-    with open(filepath, "a", newline="") as f:
-        csv.writer(f).writerow(row)
-
 def log_activity(username, action, details=""):
-    append_csv(LOGS_FILE, [
-        str(uuid.uuid4()), datetime.now().isoformat(),
-        username, action, request.remote_addr, details
-    ])
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO activity_logs (id, username, action, ip, details) VALUES (%s,%s,%s,%s,%s)",
+                    (str(uuid.uuid4()), username, action, request.remote_addr, details)
+                )
+            conn.commit()
+    except Exception:
+        pass
 
 def get_user(username):
-    for u in read_csv(USERS_FILE):
-        if u["username"] == username:
-            return u
-    return None
+    with get_db() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+            return cur.fetchone()
 
 def update_last_login(username):
-    users = read_csv(USERS_FILE)
-    for u in users:
-        if u["username"] == username:
-            u["last_login"] = datetime.now().isoformat()
-    write_csv(USERS_FILE, users,
-              ["id", "username", "password", "role", "created_at", "last_login"])
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET last_login = NOW() WHERE username = %s", (username,)
+            )
+        conn.commit()
 
 init_db()
 
@@ -116,23 +130,21 @@ def save_location():
     if "username" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     data = request.json or {}
-    lat  = data.get("latitude")
-    lon  = data.get("longitude")
-    acc  = data.get("accuracy", "N/A")
-    gps  = data.get("gps_enabled", False)
-    append_csv(LOCATIONS_FILE, [
-        str(uuid.uuid4()), datetime.now().isoformat(),
-        session["username"], lat, lon, acc, str(gps)
-    ])
-    # Coordinates stored server-side only — never returned to the client
-    log_activity(session["username"], "LOCATION_SAVED",
-                 f"Source:GPS, Acc:{acc}m")
+    lat  = str(data.get("latitude", ""))
+    lon  = str(data.get("longitude", ""))
+    acc  = str(data.get("accuracy", "N/A"))
+    gps  = str(data.get("gps_enabled", False))
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO location_logs (id,username,latitude,longitude,accuracy,gps_enabled) VALUES (%s,%s,%s,%s,%s,%s)",
+                (str(uuid.uuid4()), session["username"], lat, lon, acc, gps)
+            )
+        conn.commit()
+    log_activity(session["username"], "LOCATION_SAVED", f"Source:GPS, Acc:{acc}m")
     return jsonify({"success": True})
 
 # ── Location: Google Geolocation API fallback ─────────────
-# Called only when browser GPS fails after all retries.
-# The Google API key lives in the environment variable
-# GOOGLE_MAPS_API_KEY — it is never sent to the frontend.
 
 @app.route("/api/get_location_google", methods=["POST"])
 def get_location_google():
@@ -141,44 +153,34 @@ def get_location_google():
 
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY", "").strip()
     if not api_key:
-        log_activity(session["username"], "GOOGLE_LOC_SKIPPED",
-                     "GOOGLE_MAPS_API_KEY not set")
+        log_activity(session["username"], "GOOGLE_LOC_SKIPPED", "GOOGLE_MAPS_API_KEY not set")
         return jsonify({"error": "Google API not configured"}), 503
 
     try:
-        # Google Geolocation API — works via WiFi / cell towers / IP
-        # No GPS required, no user permission popup needed
         resp = requests.post(
             f"https://www.googleapis.com/geolocation/v1/geolocate?key={api_key}",
-            json={},      # empty body = let Google use all available signals
-            timeout=10
+            json={}, timeout=10
         )
         resp.raise_for_status()
-        data = resp.json()
+        gdata = resp.json()
 
-        if "location" not in data:
-            log_activity(session["username"], "GOOGLE_LOC_FAILED",
-                         f"Response: {data}")
+        if "location" not in gdata:
             return jsonify({"error": "No location in response"}), 502
 
-        lat = round(data["location"]["lat"], 6)
-        lon = round(data["location"]["lng"], 6)
-        acc = round(data.get("accuracy", 0))
+        lat = round(gdata["location"]["lat"], 6)
+        lon = round(gdata["location"]["lng"], 6)
+        acc = round(gdata.get("accuracy", 0))
 
-        append_csv(LOCATIONS_FILE, [
-            str(uuid.uuid4()), datetime.now().isoformat(),
-            session["username"], lat, lon, acc, "google"
-        ])
-        # API key safe — only lat/lon returned so the frontend
-        # can fetch weather. They are never displayed to the user.
-        log_activity(session["username"], "LOCATION_SAVED",
-                     f"Source:Google, Acc:{acc}m")
-        return jsonify({
-            "success":   True,
-            "latitude":  lat,
-            "longitude": lon,
-            "accuracy":  acc
-        })
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO location_logs (id,username,latitude,longitude,accuracy,gps_enabled) VALUES (%s,%s,%s,%s,%s,%s)",
+                    (str(uuid.uuid4()), session["username"], str(lat), str(lon), str(acc), "google")
+                )
+            conn.commit()
+
+        log_activity(session["username"], "LOCATION_SAVED", f"Source:Google, Acc:{acc}m")
+        return jsonify({"success": True, "latitude": lat, "longitude": lon, "accuracy": acc})
 
     except requests.exceptions.Timeout:
         log_activity(session["username"], "GOOGLE_LOC_TIMEOUT")
@@ -187,18 +189,20 @@ def get_location_google():
         log_activity(session["username"], "GOOGLE_LOC_ERROR", str(e))
         return jsonify({"error": "Google API error"}), 500
 
-# ── GPS denied / failed log ───────────────────────────────
+# ── GPS denied log ────────────────────────────────────────
 
 @app.route("/api/log_gps_denied", methods=["POST"])
 def log_gps_denied():
     if "username" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-    log_activity(session["username"], "GPS_DENIED",
-                 "Browser GPS denied / failed")
-    append_csv(LOCATIONS_FILE, [
-        str(uuid.uuid4()), datetime.now().isoformat(),
-        session["username"], "", "", "", "False"
-    ])
+    log_activity(session["username"], "GPS_DENIED", "Browser GPS denied / failed")
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO location_logs (id,username,latitude,longitude,accuracy,gps_enabled) VALUES (%s,%s,%s,%s,%s,%s)",
+                (str(uuid.uuid4()), session["username"], "", "", "", "False")
+            )
+        conn.commit()
     return jsonify({"success": True})
 
 # ── Admin Dashboard ───────────────────────────────────────
@@ -207,16 +211,31 @@ def log_gps_denied():
 def admin_dashboard():
     if session.get("role") != "admin":
         return redirect(url_for("login"))
-    users     = [u for u in read_csv(USERS_FILE) if u["role"] != "admin"]
-    logs      = read_csv(LOGS_FILE)[-50:][::-1]
-    locations = read_csv(LOCATIONS_FILE)[-50:][::-1]
-    all_logs  = read_csv(LOGS_FILE)
-    all_locs  = read_csv(LOCATIONS_FILE)
+    with get_db() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM users WHERE role != 'admin' ORDER BY created_at DESC")
+            users = cur.fetchall()
+
+            cur.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 50")
+            logs = cur.fetchall()
+
+            cur.execute("SELECT * FROM location_logs ORDER BY timestamp DESC LIMIT 50")
+            locations = cur.fetchall()
+
+            cur.execute("SELECT COUNT(*) as c FROM activity_logs WHERE action='LOGIN'")
+            total_logins = cur.fetchone()["c"]
+
+            cur.execute("SELECT COUNT(*) as c FROM location_logs WHERE gps_enabled='True'")
+            gps_enabled = cur.fetchone()["c"]
+
+            cur.execute("SELECT COUNT(*) as c FROM location_logs")
+            total_locations = cur.fetchone()["c"]
+
     stats = {
         "total_users"    : len(users),
-        "total_logins"   : sum(1 for l in all_logs if l["action"] == "LOGIN"),
-        "gps_enabled"    : sum(1 for l in all_locs  if l["gps_enabled"] == "True"),
-        "total_locations": len(all_locs)
+        "total_logins"   : total_logins,
+        "gps_enabled"    : gps_enabled,
+        "total_locations": total_locations
     }
     return render_template("admin_dashboard.html",
                            users=users, logs=logs,
@@ -232,10 +251,13 @@ def create_user():
         return redirect(url_for("admin_dashboard"))
     if get_user(username):
         return redirect(url_for("admin_dashboard") + "?error=User+already+exists")
-    append_csv(USERS_FILE, [
-        str(uuid.uuid4()), username, hash_password(password),
-        "user", datetime.now().isoformat(), ""
-    ])
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO users (id, username, password, role) VALUES (%s, %s, %s, 'user')",
+                (str(uuid.uuid4()), username, hash_password(password))
+            )
+        conn.commit()
     log_activity(session["username"], "CREATE_USER", f"Created: {username}")
     return redirect(url_for("admin_dashboard"))
 
@@ -243,38 +265,78 @@ def create_user():
 def delete_user(username):
     if session.get("role") != "admin":
         return redirect(url_for("login"))
-    users = [u for u in read_csv(USERS_FILE) if u["username"] != username]
-    write_csv(USERS_FILE, users,
-              ["id", "username", "password", "role", "created_at", "last_login"])
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM users WHERE username = %s AND role != 'admin'", (username,))
+        conn.commit()
     log_activity(session["username"], "DELETE_USER", f"Deleted: {username}")
     return redirect(url_for("admin_dashboard"))
+
+# ── Admin Exports ─────────────────────────────────────────
 
 @app.route("/admin/export_locations")
 def export_locations():
     if session.get("role") != "admin":
         return redirect(url_for("login"))
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM location_logs ORDER BY timestamp DESC")
+            rows = cur.fetchall()
+            cols = [d[0] for d in cur.description]
+    output = io.StringIO()
+    w = csv.writer(output)
+    w.writerow(cols)
+    w.writerows(rows)
+    output.seek(0)
     log_activity(session["username"], "EXPORT_LOCATIONS", "Exported location CSV")
-    return send_file(LOCATIONS_FILE, as_attachment=True,
-                     download_name="location_logs.csv")
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        as_attachment=True, download_name="location_logs.csv",
+        mimetype="text/csv"
+    )
 
 @app.route("/admin/export_logs")
 def export_logs():
     if session.get("role") != "admin":
         return redirect(url_for("login"))
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC")
+            rows = cur.fetchall()
+            cols = [d[0] for d in cur.description]
+    output = io.StringIO()
+    w = csv.writer(output)
+    w.writerow(cols)
+    w.writerows(rows)
+    output.seek(0)
     log_activity(session["username"], "EXPORT_LOGS", "Exported activity logs CSV")
-    return send_file(LOGS_FILE, as_attachment=True,
-                     download_name="activity_logs.csv")
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        as_attachment=True, download_name="activity_logs.csv",
+        mimetype="text/csv"
+    )
 
 @app.route("/admin/backup")
 def create_backup():
     if session.get("role") != "admin":
         return redirect(url_for("login"))
-    ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
-    zip_path = os.path.join(BACKUP_DIR, f"backup_{ts}.zip")
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        for f in os.listdir(DATA_DIR):
-            zf.write(os.path.join(DATA_DIR, f), f)
-    log_activity(session["username"], "BACKUP_CREATED",
-                 f"File: backup_{ts}.zip")
-    return send_file(zip_path, as_attachment=True,
-                     download_name=f"backup_{ts}.zip")
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        with get_db() as conn:
+            for table in ["users", "activity_logs", "location_logs"]:
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT * FROM {table}")
+                    rows = cur.fetchall()
+                    cols = [d[0] for d in cur.description]
+                out = io.StringIO()
+                csv.writer(out).writerow(cols)
+                csv.writer(out).writerows(rows)
+                zf.writestr(f"{table}.csv", out.getvalue())
+    zip_buffer.seek(0)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_activity(session["username"], "BACKUP_CREATED", f"backup_{ts}.zip")
+    return send_file(
+        zip_buffer, as_attachment=True,
+        download_name=f"backup_{ts}.zip",
+        mimetype="application/zip"
+    )
