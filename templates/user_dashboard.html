@@ -31,7 +31,6 @@
     overflow-x: hidden;
   }
 
-  /* Animated bg */
   .bg-layer {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
@@ -39,7 +38,6 @@
       radial-gradient(ellipse 60% 50% at 80% 100%, rgba(8,145,178,0.1) 0%, transparent 60%);
   }
 
-  /* Stars */
   .stars {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image:
@@ -51,11 +49,9 @@
       radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.2) 0%, transparent 100%);
   }
 
-  /* Navbar */
   nav {
     position: relative; z-index: 10;
-    padding: 0 32px;
-    height: 64px;
+    padding: 0 32px; height: 64px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
     background: rgba(8,12,26,0.8);
@@ -72,10 +68,7 @@
   .nav-brand span { font-size: 20px; }
 
   .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-user {
-    display: flex; align-items: center; gap: 8px;
-    color: var(--light); font-size: 14px;
-  }
+  .nav-user { display: flex; align-items: center; gap: 8px; color: var(--light); font-size: 14px; }
   .avatar {
     width: 32px; height: 32px; border-radius: 50%;
     background: linear-gradient(135deg, var(--blue), var(--cyan));
@@ -93,26 +86,42 @@
   }
   .btn-logout:hover { background: rgba(255,255,255,0.1); color: var(--text); }
 
-  /* Main */
   main {
     position: relative; z-index: 1;
     max-width: 1100px; margin: 0 auto;
     padding: 40px 24px;
   }
 
-  /* GPS Banner */
+  /* ── GPS Banner ── */
   .gps-banner {
-    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,88,12,0.1));
-    border: 1px solid rgba(245,158,11,0.3);
     border-radius: 16px; padding: 20px 24px;
     display: flex; align-items: center; gap: 16px;
     margin-bottom: 32px;
     animation: slideDown 0.4s ease;
   }
   .gps-banner.hidden { display: none; }
+
+  .banner-waiting {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(8,145,178,0.1));
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+  .banner-denied {
+    background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(185,28,28,0.1));
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .banner-prompt {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,88,12,0.1));
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+
   .gps-banner .icon { font-size: 28px; flex-shrink: 0; }
-  .gps-banner h3 { font-size: 15px; font-weight: 600; color: #fcd34d; margin-bottom: 2px; }
-  .gps-banner p { font-size: 13px; color: #92400e; color: rgba(253,230,138,0.7); }
+  .gps-banner h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .gps-banner p  { font-size: 13px; opacity: 0.75; }
+
+  .banner-waiting h3 { color: #93c5fd; }
+  .banner-denied  h3 { color: #fca5a5; }
+  .banner-prompt  h3 { color: #fcd34d; }
+
   .btn-enable-gps {
     margin-left: auto; flex-shrink: 0;
     padding: 10px 20px;
@@ -123,13 +132,36 @@
     box-shadow: 0 4px 15px rgba(245,158,11,0.4);
   }
   .btn-enable-gps:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,158,11,0.5); }
+  .btn-enable-gps:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-12px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Weather Hero */
+  /* ── Loading ── */
+  .loading-state { text-align: center; padding: 60px 24px; color: var(--muted); }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--blue);
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+  .loading-sub { font-size: 12px; margin-top: 8px; color: var(--muted); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    width: 220px; height: 4px; background: var(--border);
+    border-radius: 4px; margin: 12px auto 0; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── Weather Hero ── */
   .weather-hero {
     background: linear-gradient(135deg, rgba(29,78,216,0.2), rgba(8,145,178,0.15));
     border: 1px solid rgba(59,130,246,0.2);
@@ -138,7 +170,6 @@
     position: relative; overflow: hidden;
     animation: fadeUp 0.5s ease both;
   }
-
   .weather-hero::before {
     content: '';
     position: absolute; top: -50px; right: -50px;
@@ -149,161 +180,79 @@
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .weather-top {
     display: flex; align-items: flex-start; justify-content: space-between;
     flex-wrap: wrap; gap: 20px;
   }
-
   .location-info h2 {
     font-size: 15px; font-weight: 500; color: var(--cyan); margin-bottom: 6px;
     display: flex; align-items: center; gap: 6px;
   }
-  .location-info .city {
-    font-size: 32px; font-weight: 700; color: var(--text); line-height: 1;
-    margin-bottom: 4px;
-  }
-  .location-info .coords {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px; color: var(--muted); margin-top: 8px;
-  }
-
-  .temp-display {
-    text-align: right;
-  }
+  .location-info .city { font-size: 32px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .temp-display { text-align: right; }
   .temp-display .temp {
     font-size: 72px; font-weight: 800; line-height: 1;
     background: linear-gradient(135deg, #93c5fd, #67e8f9);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .temp-display .feels {
-    font-size: 13px; color: var(--muted); margin-top: 4px;
-  }
+  .temp-display .feels { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
   .weather-icon-big {
     font-size: 80px; filter: drop-shadow(0 0 20px rgba(6,182,212,0.4));
     animation: float 4s ease-in-out infinite;
     margin: 20px 0;
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-  .weather-desc {
-    font-size: 18px; font-weight: 500; color: var(--light); margin-bottom: 24px;
-    text-transform: capitalize;
-  }
+  .weather-desc { font-size: 18px; font-weight: 500; color: var(--light); margin-bottom: 24px; text-transform: capitalize; }
 
-  .weather-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
-  }
-  .stat-item {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px;
-    text-align: center;
-  }
+  .weather-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 16px; }
+  .stat-item { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
   .stat-item .stat-icon { font-size: 20px; margin-bottom: 8px; }
-  .stat-item .stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
+  .stat-item .stat-val  { font-size: 18px; font-weight: 700; color: var(--text); }
   .stat-item .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-  /* Cards row */
+  /* ── Cards ── */
   .cards-row {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
     gap: 20px; margin-bottom: 28px;
     animation: fadeUp 0.5s 0.1s ease both;
   }
-
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px;
-    transition: border-color 0.2s;
-  }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: border-color 0.2s; }
   .card:hover { border-color: rgba(59,130,246,0.3); }
-
-  .card-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 16px;
-  }
-  .card-header .icon {
-    width: 36px; height: 36px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; font-size: 16px;
-  }
-  .icon-blue { background: rgba(59,130,246,0.15); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .card-header .icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .icon-blue  { background: rgba(59,130,246,0.15); }
   .icon-green { background: rgba(16,185,129,0.15); }
   .icon-amber { background: rgba(245,158,11,0.15); }
-
   .card-header h3 { font-size: 14px; font-weight: 600; color: var(--light); }
-
   .card-value { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
   .card-sub { font-size: 12px; color: var(--muted); }
 
-  /* GPS Status badge */
-  .gps-status {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-    margin-top: 8px;
-  }
-  .gps-status.active { background: rgba(16,185,129,0.15); color: #34d399; }
-  .gps-status.inactive { background: rgba(239,68,68,0.15); color: #f87171; }
+  .gps-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 8px; }
+  .gps-status.active   { background: rgba(16,185,129,0.15); color: #34d399; }
+  .gps-status.inactive { background: rgba(239,68,68,0.15);  color: #f87171; }
   .gps-dot { width: 6px; height: 6px; border-radius: 50%; }
   .dot-green { background: #34d399; animation: blink 2s infinite; }
-  .dot-red { background: #f87171; }
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .dot-red   { background: #f87171; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
-  /* Forecast */
-  .forecast-section {
-    animation: fadeUp 0.5s 0.2s ease both;
-  }
-  .section-title {
-    font-size: 13px; font-weight: 600; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.08em;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-  .section-title::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-
-  .forecast-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px;
-  }
-  .forecast-card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 14px; padding: 18px 12px; text-align: center;
-    transition: all 0.2s;
-  }
-  .forecast-card:hover {
-    background: rgba(59,130,246,0.08);
-    border-color: rgba(59,130,246,0.3);
-    transform: translateY(-2px);
-  }
-  .fc-day { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  /* ── Forecast ── */
+  .forecast-section { animation: fadeUp 0.5s 0.2s ease both; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px,1fr)); gap: 12px; }
+  .forecast-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 12px; text-align: center; transition: all 0.2s; }
+  .forecast-card:hover { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); transform: translateY(-2px); }
+  .fc-day  { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
   .fc-icon { font-size: 28px; margin-bottom: 8px; }
-  .fc-hi { font-size: 18px; font-weight: 700; color: var(--text); }
-  .fc-lo { font-size: 12px; color: var(--muted); }
+  .fc-hi   { font-size: 18px; font-weight: 700; color: var(--text); }
+  .fc-lo   { font-size: 12px; color: var(--muted); }
 
-  /* Loading state */
-  .loading-state {
-    text-align: center; padding: 60px 24px;
-    color: var(--muted);
-  }
-  .spinner {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 3px solid var(--border); border-top-color: var(--blue);
-    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .time-display {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px; color: var(--muted);
-  }
+  .time-display { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); }
 
   @media (max-width: 600px) {
     nav { padding: 0 16px; }
@@ -319,9 +268,7 @@
 <div class="stars"></div>
 
 <nav>
-  <div class="nav-brand">
-    <span>🌤</span> WeatherSphere
-  </div>
+  <div class="nav-brand"><span>🌤</span> WeatherSphere</div>
   <div class="nav-right">
     <div class="nav-user">
       <div class="avatar">{{ username[0].upper() }}</div>
@@ -332,31 +279,32 @@
 </nav>
 
 <main>
-  <!-- GPS Banner -->
-  <div class="gps-banner" id="gpsBanner">
-    <div class="icon">📡</div>
+
+  <!-- GPS Banner (state-driven) -->
+  <div class="gps-banner banner-prompt hidden" id="gpsBanner">
+    <div class="icon" id="bannerIcon">📡</div>
     <div>
-      <h3>Location Access Required</h3>
-      <p>Enable GPS to get accurate weather for your current location. Without it, we can't provide precise forecasts.</p>
+      <h3 id="bannerTitle">Location Access Required</h3>
+      <p id="bannerMsg">Enable GPS to get accurate weather for your current location.</p>
     </div>
-    <button class="btn-enable-gps" onclick="requestLocation()">Enable Location →</button>
+    <button class="btn-enable-gps" id="btnEnableGps" onclick="startGPS()">Enable Location →</button>
   </div>
 
   <!-- Loading State -->
-  <div class="loading-state" id="loadingState">
+  <div class="loading-state" id="loadingState" style="display:none">
     <div class="spinner"></div>
-    <p>Acquiring your location...</p>
+    <p id="loadingMsg">Acquiring GPS signal…</p>
+    <div class="loading-sub" id="loadingSub">This may take up to 30 seconds</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
   </div>
 
-  <!-- Weather Content (hidden until loaded) -->
+  <!-- Weather Content -->
   <div id="weatherContent" style="display:none">
-
-    <!-- Hero -->
     <div class="weather-hero">
       <div class="weather-top">
         <div class="location-info">
           <h2>📍 <span id="locationName">Your Location</span></h2>
-          <div class="city" id="cityName">Loading...</div>
+          <div class="city" id="cityName">Loading…</div>
           <div class="time-display" id="currentTime"></div>
         </div>
         <div class="temp-display">
@@ -365,8 +313,8 @@
         </div>
       </div>
       <div class="weather-icon-big" id="weatherEmoji">⛅</div>
-      <div class="weather-desc" id="weatherDesc">Fetching weather...</div>
-      <div class="weather-stats" id="weatherStats">
+      <div class="weather-desc" id="weatherDesc">Fetching weather…</div>
+      <div class="weather-stats">
         <div class="stat-item"><div class="stat-icon">💧</div><div class="stat-val" id="humidity">--</div><div class="stat-label">Humidity</div></div>
         <div class="stat-item"><div class="stat-icon">💨</div><div class="stat-val" id="windSpeed">--</div><div class="stat-label">Wind</div></div>
         <div class="stat-item"><div class="stat-icon">👁</div><div class="stat-val" id="visibility">--</div><div class="stat-label">Visibility</div></div>
@@ -374,200 +322,296 @@
       </div>
     </div>
 
-    <!-- Cards -->
     <div class="cards-row">
       <div class="card">
-        <div class="card-header">
-          <div class="icon icon-blue">📡</div>
-          <h3>GPS Status</h3>
-        </div>
-        <div class="gps-status active" id="gpsStatusBadge">
-          <span class="gps-dot dot-green"></span> Active
-        </div>
+        <div class="card-header"><div class="icon icon-blue">📡</div><h3>GPS Status</h3></div>
+        <div class="gps-status active" id="gpsStatusBadge"><span class="gps-dot dot-green"></span> Active</div>
         <div class="card-sub" style="margin-top:8px" id="gpsAccuracy">Accuracy: --</div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="icon icon-green">🌅</div>
-          <h3>Sunrise / Sunset</h3>
-        </div>
+        <div class="card-header"><div class="icon icon-green">🌅</div><h3>Sunrise / Sunset</h3></div>
         <div class="card-value" id="sunriseTime">--</div>
         <div class="card-sub">Sunrise · <span id="sunsetTime">--</span> Sunset</div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="icon icon-amber">🌡</div>
-          <h3>Temperature Range</h3>
-        </div>
+        <div class="card-header"><div class="icon icon-amber">🌡</div><h3>Temperature Range</h3></div>
         <div class="card-value" id="tempRange">-- / --</div>
         <div class="card-sub">High / Low today</div>
       </div>
     </div>
 
-    <!-- Forecast -->
     <div class="forecast-section">
       <div class="section-title">5-Day Forecast</div>
-      <div class="forecast-grid" id="forecastGrid">
-        <!-- filled by JS -->
-      </div>
+      <div class="forecast-grid" id="forecastGrid"></div>
     </div>
   </div>
+
 </main>
 
 <script>
-const username = "{{ username }}";
-let locationGranted = false;
+  /* ─────────────── Constants ─────────────── */
+  const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
+  const GEO_API     = "https://nominatim.openstreetmap.org/reverse";
+  const GPS_TIMEOUT  = 30000;   // 30s — enough for a cold GPS lock
+  const MAX_RETRIES  = 3;       // auto-retry up to 3 times on timeout/unavailable
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
-const GEO_API = "https://nominatim.openstreetmap.org/reverse";
+  const weatherCodes = {
+    0:["☀️","Clear sky"], 1:["🌤","Mainly clear"], 2:["⛅","Partly cloudy"],
+    3:["☁️","Overcast"], 45:["🌫","Foggy"], 48:["🌫","Icy fog"],
+    51:["🌦","Light drizzle"], 53:["🌦","Drizzle"], 55:["🌧","Heavy drizzle"],
+    61:["🌧","Slight rain"], 63:["🌧","Rain"], 65:["🌧","Heavy rain"],
+    71:["🌨","Light snow"], 73:["❄️","Snow"], 75:["❄️","Heavy snow"],
+    80:["🌦","Rain showers"], 81:["🌧","Showers"], 82:["⛈","Heavy showers"],
+    95:["⛈","Thunderstorm"], 96:["⛈","Thunderstorm+hail"], 99:["⛈","Severe thunderstorm"]
+  };
 
-const weatherCodes = {
-  0: ["☀️", "Clear sky"], 1: ["🌤", "Mainly clear"], 2: ["⛅", "Partly cloudy"],
-  3: ["☁️", "Overcast"], 45: ["🌫", "Foggy"], 48: ["🌫", "Icy fog"],
-  51: ["🌦", "Light drizzle"], 53: ["🌦", "Drizzle"], 55: ["🌧", "Heavy drizzle"],
-  61: ["🌧", "Slight rain"], 63: ["🌧", "Rain"], 65: ["🌧", "Heavy rain"],
-  71: ["🌨", "Light snow"], 73: ["❄️", "Snow"], 75: ["❄️", "Heavy snow"],
-  80: ["🌦", "Rain showers"], 81: ["🌧", "Showers"], 82: ["⛈", "Heavy showers"],
-  95: ["⛈", "Thunderstorm"], 96: ["⛈", "Thunderstorm+hail"], 99: ["⛈", "Severe thunderstorm"]
-};
+  /* ─────────────── State ─────────────── */
+  let retryCount     = 0;
+  let progressTimer  = null;
+  let watchId        = null;
+  let locationDone   = false;   // prevent double-firing from watchPosition
 
-const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-function updateTime() {
-  const now = new Date();
-  document.getElementById("currentTime").textContent =
-    now.toLocaleDateString("en-IN", { weekday:"long", year:"numeric", month:"long", day:"numeric" }) +
-    " · " + now.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
-}
-setInterval(updateTime, 1000); updateTime();
-
-async function fetchWeather(lat, lon) {
-  const url = `${WEATHER_API}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=5`;
-  const res = await fetch(url);
-  return await res.json();
-}
-
-async function reverseGeocode(lat, lon) {
-  try {
-    const res = await fetch(`${GEO_API}?lat=${lat}&lon=${lon}&format=json`);
-    const data = await res.json();
-    const addr = data.address;
-    return addr.city || addr.town || addr.village || addr.county || "Unknown Location";
-  } catch { return "Your Location"; }
-}
-
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
-}
-
-async function onLocationSuccess(position) {
-  const lat = position.coords.latitude.toFixed(5);
-  const lon = position.coords.longitude.toFixed(5);
-  const acc = Math.round(position.coords.accuracy);
-  locationGranted = true;
-
-  // Save to server
-  await fetch("/api/save_location", {
-    method: "POST", headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ latitude: lat, longitude: lon, accuracy: acc, gps_enabled: true })
-  });
-
-  // Hide banner + loading
-  document.getElementById("gpsBanner").classList.add("hidden");
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("weatherContent").style.display = "block";
-
-  // Display coords
-  document.getElementById("gpsAccuracy").textContent = `Accuracy: ±${acc}m`;
-
-  // Reverse geocode
-  const city = await reverseGeocode(lat, lon);
-  document.getElementById("cityName").textContent = city;
-  document.getElementById("locationName").textContent = city;
-
-  // Fetch weather
-  const weather = await fetchWeather(lat, lon);
-  const cur = weather.current;
-  const daily = weather.daily;
-
-  const code = cur.weather_code;
-  const [emoji, desc] = weatherCodes[code] || ["🌡", "Unknown"];
-
-  document.getElementById("weatherEmoji").textContent = emoji;
-  document.getElementById("weatherDesc").textContent = desc;
-  document.getElementById("tempValue").textContent = Math.round(cur.temperature_2m) + "°C";
-  document.getElementById("feelsLike").textContent = `Feels like ${Math.round(cur.apparent_temperature)}°C`;
-  document.getElementById("humidity").textContent = cur.relative_humidity_2m + "%";
-  document.getElementById("windSpeed").textContent = Math.round(cur.wind_speed_10m) + " km/h";
-  document.getElementById("visibility").textContent = cur.visibility ? Math.round(cur.visibility/1000) + " km" : "N/A";
-  document.getElementById("pressure").textContent = Math.round(cur.surface_pressure) + " hPa";
-  document.getElementById("sunriseTime").textContent = formatTime(daily.sunrise[0]);
-  document.getElementById("sunsetTime").textContent = formatTime(daily.sunset[0]);
-  document.getElementById("tempRange").textContent =
-    Math.round(daily.temperature_2m_max[0]) + "° / " + Math.round(daily.temperature_2m_min[0]) + "°";
-
-  // Forecast
-  const fg = document.getElementById("forecastGrid");
-  fg.innerHTML = "";
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(daily.time[i]);
-    const [fEmoji] = weatherCodes[daily.weather_code[i]] || ["🌡"];
-    fg.innerHTML += `
-      <div class="forecast-card">
-        <div class="fc-day">${i === 0 ? "Today" : days[d.getDay()]}</div>
-        <div class="fc-icon">${fEmoji}</div>
-        <div class="fc-hi">${Math.round(daily.temperature_2m_max[i])}°</div>
-        <div class="fc-lo">${Math.round(daily.temperature_2m_min[i])}°</div>
-      </div>`;
+  /* ─────────────── Clock ─────────────── */
+  function updateTime() {
+    const el = document.getElementById("currentTime");
+    if (el) el.textContent =
+      new Date().toLocaleDateString("en-IN", { weekday:"long", year:"numeric", month:"long", day:"numeric" }) +
+      " · " + new Date().toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
   }
-}
+  setInterval(updateTime, 1000);
+  updateTime();
 
-async function onLocationError(err) {
-  await fetch("/api/log_gps_denied", { method:"POST" });
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("gpsBanner").style.display = "flex";
-
-  const banner = document.getElementById("gpsBanner");
-  banner.querySelector("h3").textContent = "Location Access Denied";
-  banner.querySelector("p").textContent =
-    "Please enable location permissions in your browser settings and reload the page for accurate weather data.";
-  banner.style.background = "linear-gradient(135deg, rgba(239,68,68,0.15), rgba(185,28,28,0.1))";
-  banner.style.borderColor = "rgba(239,68,68,0.3)";
-  banner.querySelector("h3").style.color = "#fca5a5";
-  banner.querySelector(".btn-enable-gps").textContent = "Retry →";
-
-  const gpsB = document.getElementById("gpsStatusBadge");
-  if (gpsB) {
-    gpsB.className = "gps-status inactive";
-    gpsB.innerHTML = '<span class="gps-dot dot-red"></span> Inactive';
+  /* ─────────────── Progress animation ─────────────── */
+  function startProgress() {
+    let pct = 0;
+    clearInterval(progressTimer);
+    document.getElementById("progressBar").style.width = "0%";
+    progressTimer = setInterval(() => {
+      // Slowly creep to 90% — jumps to 100% on success
+      pct = Math.min(pct + (Math.random() * 3), 90);
+      document.getElementById("progressBar").style.width = pct + "%";
+    }, 400);
   }
-}
+  function finishProgress() {
+    clearInterval(progressTimer);
+    document.getElementById("progressBar").style.width = "100%";
+  }
 
-function requestLocation() {
-  document.getElementById("gpsBanner").classList.add("hidden");
-  document.getElementById("loadingState").style.display = "block";
-  navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, {
-    enableHighAccuracy: true, timeout: 15000
-  });
-}
+  /* ─────────────── UI helpers ─────────────── */
+  function showLoading(msg, sub) {
+    document.getElementById("gpsBanner").classList.add("hidden");
+    document.getElementById("loadingState").style.display = "block";
+    document.getElementById("weatherContent").style.display = "none";
+    document.getElementById("loadingMsg").textContent  = msg || "Acquiring GPS signal…";
+    document.getElementById("loadingSub").textContent  = sub || "This may take up to 30 seconds";
+    startProgress();
+  }
 
-// Auto-request on load
-window.onload = () => {
-  document.getElementById("loadingState").style.display = "block";
-  document.getElementById("gpsBanner").classList.add("hidden");
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, {
-      enableHighAccuracy: true, timeout: 15000
-    });
-  } else {
+  function showBanner(type, title, msg, btnText) {
+    stopWatch();
+    finishProgress();
     document.getElementById("loadingState").style.display = "none";
-    document.getElementById("gpsBanner").style.display = "flex";
-    document.getElementById("gpsBanner").querySelector("p").textContent =
-      "Your browser does not support geolocation. Please use a modern browser.";
+    document.getElementById("weatherContent").style.display = "none";
+
+    const banner = document.getElementById("gpsBanner");
+    banner.className = "gps-banner " + type;   // banner-prompt | banner-denied | banner-waiting
+    banner.classList.remove("hidden");
+
+    const icons = { "banner-prompt":"📡", "banner-denied":"🚫", "banner-waiting":"⏳" };
+    document.getElementById("bannerIcon").textContent  = icons[type] || "📡";
+    document.getElementById("bannerTitle").textContent = title;
+    document.getElementById("bannerMsg").textContent   = msg;
+
+    const btn = document.getElementById("btnEnableGps");
+    btn.textContent = btnText || "Retry →";
+    btn.disabled = false;
   }
-};
+
+  function stopWatch() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+  }
+
+  /* ─────────────── Core GPS logic ─────────────── */
+  function startGPS() {
+    if (!navigator.geolocation) {
+      showBanner("banner-denied",
+        "Browser Not Supported",
+        "Your browser does not support location services. Please use Chrome or Firefox on mobile.",
+        "—");
+      document.getElementById("btnEnableGps").disabled = true;
+      return;
+    }
+
+    locationDone = false;
+    retryCount   = 0;
+    document.getElementById("btnEnableGps").disabled = true;
+    attemptGPS();
+  }
+
+  function attemptGPS() {
+    showLoading(
+      retryCount === 0 ? "Acquiring GPS signal…" : `Retrying… (attempt ${retryCount + 1} of ${MAX_RETRIES})`,
+      "Please keep the app open and stay near a window or outdoors"
+    );
+
+    stopWatch();   // clear any previous watch
+
+    // Use watchPosition instead of getCurrentPosition —
+    // it keeps trying until a fix is found, then we clear it ourselves.
+    watchId = navigator.geolocation.watchPosition(
+      onGPSSuccess,
+      onGPSError,
+      {
+        enableHighAccuracy: true,
+        timeout: GPS_TIMEOUT,
+        maximumAge: 0          // always fresh — never use cached position
+      }
+    );
+  }
+
+  /* ─────────────── Success ─────────────── */
+  async function onGPSSuccess(position) {
+    if (locationDone) return;   // watchPosition can fire multiple times — ignore after first
+    locationDone = true;
+    stopWatch();
+    finishProgress();
+
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const acc = Math.round(position.coords.accuracy);
+
+    // Save to server — no coords shown to user
+    try {
+      await fetch("/api/save_location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude: lat, longitude: lon, accuracy: acc, gps_enabled: true })
+      });
+    } catch (_) { /* network hiccup — non-fatal */ }
+
+    // Show content
+    document.getElementById("loadingState").style.display = "none";
+    document.getElementById("gpsBanner").classList.add("hidden");
+    document.getElementById("weatherContent").style.display = "block";
+    document.getElementById("gpsAccuracy").textContent = `Accuracy: ±${acc}m`;
+
+    // Reverse geocode
+    const city = await reverseGeocode(lat, lon);
+    document.getElementById("cityName").textContent    = city;
+    document.getElementById("locationName").textContent = city;
+
+    // Weather
+    await loadWeather(lat, lon);
+  }
+
+  /* ─────────────── Error — smart handling ─────────────── */
+  async function onGPSError(err) {
+    if (locationDone) return;
+    stopWatch();
+
+    // PERMISSION_DENIED (code 1) — user explicitly blocked → don't retry
+    if (err.code === 1) {
+      await logDenied();
+      showBanner(
+        "banner-denied",
+        "Location Access Blocked",
+        "You denied location access. To fix this: tap the 🔒 lock icon in your browser address bar → Site settings → Allow Location, then tap Retry.",
+        "Retry →"
+      );
+      return;
+    }
+
+    // POSITION_UNAVAILABLE (code 2) or TIMEOUT (code 3) — retry silently
+    if (retryCount < MAX_RETRIES - 1) {
+      retryCount++;
+      attemptGPS();   // silent retry — no error shown to user
+      return;
+    }
+
+    // All retries exhausted
+    await logDenied();
+    showBanner(
+      "banner-denied",
+      "GPS Signal Not Found",
+      "Could not get your location after multiple attempts. Make sure GPS is on, move near a window or outdoors, then tap Retry.",
+      "Retry →"
+    );
+  }
+
+  async function logDenied() {
+    try {
+      await fetch("/api/log_gps_denied", { method: "POST" });
+    } catch (_) {}
+  }
+
+  /* ─────────────── Weather & Geocode ─────────────── */
+  async function reverseGeocode(lat, lon) {
+    try {
+      const res  = await fetch(`${GEO_API}?lat=${lat}&lon=${lon}&format=json`);
+      const data = await res.json();
+      const a    = data.address;
+      return a.city || a.town || a.village || a.county || "Your Location";
+    } catch { return "Your Location"; }
+  }
+
+  async function loadWeather(lat, lon) {
+    try {
+      const url = `${WEATHER_API}?latitude=${lat}&longitude=${lon}` +
+        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,visibility` +
+        `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset` +
+        `&timezone=auto&forecast_days=5`;
+      const res     = await fetch(url);
+      const weather = await res.json();
+      renderWeather(weather);
+    } catch {
+      document.getElementById("weatherDesc").textContent = "Weather data unavailable";
+    }
+  }
+
+  function renderWeather(weather) {
+    const cur   = weather.current;
+    const daily = weather.daily;
+    const code  = cur.weather_code;
+    const [emoji, desc] = weatherCodes[code] || ["🌡", "Unknown"];
+
+    document.getElementById("weatherEmoji").textContent  = emoji;
+    document.getElementById("weatherDesc").textContent   = desc;
+    document.getElementById("tempValue").textContent     = Math.round(cur.temperature_2m) + "°C";
+    document.getElementById("feelsLike").textContent     = `Feels like ${Math.round(cur.apparent_temperature)}°C`;
+    document.getElementById("humidity").textContent      = cur.relative_humidity_2m + "%";
+    document.getElementById("windSpeed").textContent     = Math.round(cur.wind_speed_10m) + " km/h";
+    document.getElementById("visibility").textContent    = cur.visibility ? Math.round(cur.visibility / 1000) + " km" : "N/A";
+    document.getElementById("pressure").textContent      = Math.round(cur.surface_pressure) + " hPa";
+    document.getElementById("sunriseTime").textContent   = formatTime(daily.sunrise[0]);
+    document.getElementById("sunsetTime").textContent    = formatTime(daily.sunset[0]);
+    document.getElementById("tempRange").textContent     =
+      Math.round(daily.temperature_2m_max[0]) + "° / " + Math.round(daily.temperature_2m_min[0]) + "°";
+
+    const fg = document.getElementById("forecastGrid");
+    fg.innerHTML = "";
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(daily.time[i]);
+      const [fEmoji] = weatherCodes[daily.weather_code[i]] || ["🌡"];
+      fg.innerHTML += `
+        <div class="forecast-card">
+          <div class="fc-day">${i === 0 ? "Today" : days[d.getDay()]}</div>
+          <div class="fc-icon">${fEmoji}</div>
+          <div class="fc-hi">${Math.round(daily.temperature_2m_max[i])}°</div>
+          <div class="fc-lo">${Math.round(daily.temperature_2m_min[i])}°</div>
+        </div>`;
+    }
+  }
+
+  function formatTime(iso) {
+    return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  /* ─────────────── Boot ─────────────── */
+  window.onload = () => startGPS();
 </script>
 </body>
 </html>
